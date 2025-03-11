@@ -6,12 +6,12 @@ public class Exploder : MonoBehaviour
     [SerializeField] private float _force = 500f;
     [SerializeField] private float _radius = 20f;
 
-    public void TriggerExplosion(Splitable splitable)
+    public void TriggerExplosion(Transform transform)
     {
-        float newRadius = _radius / splitable.transform.localScale.x;
-        float newForce = _force / splitable.transform.localScale.x;
+        float newRadius = _radius / transform.localScale.magnitude;
+        float newForce = _force / transform.localScale.magnitude;
         
-        Explode(newForce, newRadius, splitable.transform.position);
+        Explode(newForce, newRadius, transform.position);
     }
     
     private void Explode(float force, float radius, Vector3 position)

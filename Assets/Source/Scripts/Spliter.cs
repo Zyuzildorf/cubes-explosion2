@@ -26,7 +26,7 @@ public class Spliter : MonoBehaviour
                 }
                 else
                 {
-                    _exploder.TriggerExplosion(splitable);
+                    _exploder.TriggerExplosion(splitable.transform);
                 }
 
                 Destroy(splitable.gameObject);
