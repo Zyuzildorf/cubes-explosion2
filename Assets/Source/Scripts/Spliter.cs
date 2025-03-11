@@ -9,6 +9,7 @@ public class Spliter : MonoBehaviour
     [SerializeField] private List<Material> _materials;
     [SerializeField] private int _minNumberOfCubes = 2;
     [SerializeField] private int _maxNumberOfCubes = 6;
+    [SerializeField] private int _splitReduceCoefficient = 2;
 
     private void Update()
     {
