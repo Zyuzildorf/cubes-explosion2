@@ -6,34 +6,20 @@ public class Exploder : MonoBehaviour
     [SerializeField] private float _force = 500f;
     [SerializeField] private float _radius = 20f;
 
-    public void TriggerExplosion(Transform transform)
+    public void TriggerExplosion(Transform transform, List<Rigidbody> explodableObjects)
     {
         float newRadius = _radius / transform.localScale.magnitude;
         float newForce = _force / transform.localScale.magnitude;
-        
-        Explode(newForce, newRadius, transform.position);
+
+        Explode(newForce, newRadius, transform.position,explodableObjects);
     }
-    
-    private void Explode(float force, float radius, Vector3 position)
+
+
+    private void Explode(float force, float radius, Vector3 position, List<Rigidbody> explodableObjects)
     {
-        foreach (Rigidbody explodableObject in GetExplodableObjects(radius))
+        foreach (Rigidbody explodableObject in explodableObjects)
         {
             explodableObject.AddExplosionForce(force, position, radius);
         }
-    }
-
-    private List<Rigidbody> GetExplodableObjects(float radius)
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, radius);
-
-        List<Rigidbody> objects = new List<Rigidbody>();
-
-        foreach (Collider hit in hits)
-        {
-            if(hit.attachedRigidbody != null)
-                objects.Add(hit.attachedRigidbody);
-        }
-
-        return objects;
     }
 }

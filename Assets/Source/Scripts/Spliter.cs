@@ -1,43 +1,51 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class Spliter : MonoBehaviour
 {
+    [SerializeField] private ExplodableObjectsFinder _explodableObjectsFinder;
     [SerializeField] private Splitable _template;
     [SerializeField] private Exploder _exploder;
-    [SerializeField] private List<Material> _materials;
+    [SerializeField] private Raycaster _raycaster;
+    [SerializeField] private ColorRandomizer _colorRandomizer;
     [SerializeField] private int _minNumberOfCubes = 2;
     [SerializeField] private int _maxNumberOfCubes = 6;
-    [SerializeField] private int _splitReduceCoefficient = 2;
+    [SerializeField] private int _reduceCoefficient = 2;
 
-    private void Update()
+    private Vector2Int _minMaxRandomChance = new Vector2Int(0, 100);
+
+    private void OnEnable()
     {
-        if (Input.GetMouseButtonDown(0))
+        _raycaster.OnObjectFound += OnObjectFound;
+    }
+
+    private void OnDisable()
+    {
+        _raycaster.OnObjectFound -= OnObjectFound;
+    }
+
+    private void OnObjectFound(Collider collider)
+    {
+        if (collider.TryGetComponent(out Splitable splitable))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity) &&
-                hit.collider.TryGetComponent(out Splitable splitable))
+            if (TrySplitObject(splitable))
             {
-                if (TrySplitObject(splitable))
-                {
-                    Split(splitable);
-                }
-                else
-                {
-                    _exploder.TriggerExplosion(splitable.transform);
-                }
-
-                Destroy(splitable.gameObject);
+                Split(splitable);
             }
+            else
+            {
+                _exploder.TriggerExplosion(splitable.transform,
+                    _explodableObjectsFinder.GetExplodableObjects(splitable.transform.position));
+            }
+
+            Destroy(splitable.gameObject);
         }
     }
 
     private bool TrySplitObject(Splitable splitable)
     {
         bool isObjectSplitting;
-        int chance = Random.Range(0, 100);
+        int chance = Random.Range(_minMaxRandomChance.x, _minMaxRandomChance.y);
 
         if (chance < splitable.SplitChance)
         {
@@ -57,9 +65,9 @@ public class Spliter : MonoBehaviour
 
         for (int i = 0; i < amountNewCubes; i++)
         {
-            Material newRandomMaterial = _materials[Random.Range(0, _materials.Count)];
             Splitable newSplittable = Instantiate(_template, splitable.transform.position, Quaternion.identity);
-            newSplittable.Init(splitable.SplitChance / 2, newRandomMaterial, splitable.transform.localScale / 2);
+            newSplittable.Init(splitable.SplitChance / _reduceCoefficient, _colorRandomizer.RandomizeMaterial(),
+                splitable.transform.localScale / _reduceCoefficient);
         }
     }
 }
